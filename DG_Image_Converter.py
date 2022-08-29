@@ -159,10 +159,10 @@ if __name__ == "__main__":
     
     window.title("DG Image Converter")
     
-    window.iconbitmap(r'C:\Users\davea\University of Illinois - Urbana\Class Files - Documents\Projects\DG Image Converter\DGLogoWhiteBG.ico')
+    window.iconbitmap(r'DGLogoWhiteBG.ico')
     
     img = ImageTk.PhotoImage(PIL.Image.open(
-        r"C:\Users\davea\University of Illinois - Urbana\Class Files - Documents\Projects\DG Image Converter\DGLogoBlackBG.ico").resize((50, 50)))
+        r"DGLogoBlackBG.ico").resize((50, 50)))
 
     logo_frame = Frame(window, width=2, height=2)
     logo_label = Label(logo_frame, image=img, relief="solid")
@@ -223,9 +223,6 @@ if __name__ == "__main__":
         watermark_frame, text="Watermark:", bg='black', fg='white')
     watermark_input = Entry(
         watermark_frame, width=30, textvariable=watermark_var)
-    
-    # multiprocessing_input.insert(0,"0")
-    watermark_var.set(u"\u00A9 David Gable")
     
     run_label = Label(run_frame, text="Not Running.", bg='black', fg='white')
     run_button = Button(run_frame, text="Convert Files",
