@@ -55,15 +55,40 @@ def GetDestFolder():
             dest_label.config(text=dest)
 
 
-def ProcessImage(source, dest, file, dest_format, source_format, watermark):
+def ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y):
     im1 = PIL.Image.open(source+'/'+file)
     if source_format == '.PNG' and dest_format == '.JPG':
-        im1 = im1.convert('RGB')
-         
+        im1 = im1.convert('RGB') 
+    
+    if resize_x == 0 and resize_y == 0:
+        pass
+    
+    elif resize_x == 0 and resize_y != 0:
+        width, height = im1.width, im1.height
+        AR = height/width
+        # maintian AR
+        w_n = int(resize_y/height*width)
+        
+        # resize to height
+        im1 = im1.resize((w_n, resize_y))
+        
+    elif resize_x != 0 and resize_y == 0:
+        width, height = im1.width, im1.height
+        AR = height/width
+        #maintain AR
+        h_n = int(resize_x/width*height)
+        
+        # resize to width
+        im1 = im1.resize((resize_x, h_n))
+
+    elif resize_x != 0 and resize_y != 0:
+        # resize both
+        im1 = im1.resize((resize_x, resize_y))
+        
     if watermark != "":
         width, height = im1.width, im1.height
         
-        font = PIL.ImageFont.truetype("Helvetica.ttf",int(height*0.025))
+        font = PIL.ImageFont.truetype("Helvetica-Bold.ttf",int(height*0.025))
         w,h = font.getsize(watermark)
         
         w_margin = 0.02
@@ -90,6 +115,8 @@ def RunImageConversion():
     source = config["source"]
     dest = config["dest"]
     watermark = watermark_var.get()
+    resize_x = resize_x_var.get()
+    resize_y = resize_y_var.get()
     
     dest_format = dest_format_var.get()
     source_format = source_format_var.get()
@@ -106,9 +133,13 @@ def RunImageConversion():
                 dest_format_tuple = [dest_format]*len(files)
                 source_format_tuple = [source_format]*len(files)
                 watermark_tuple = [watermark]*len(files)
+                resize_x_tuple = [resize_x]*len(files)
+                resize_y_tuple = [resize_y]*len(files)
                 
                 iter_var = [*zip(source_tuple, dest_tuple,
-                                 files_tuple, dest_format_tuple, source_format_tuple, watermark_tuple)]
+                                 files_tuple, dest_format_tuple, 
+                                 source_format_tuple, watermark_tuple,
+                                 resize_x_tuple, resize_y_tuple)]
 
                 pool = multiprocessing.Pool(int(multiprocessing_var.get()))
                 pool.starmap(ProcessImage, iterable=iter_var)
@@ -127,7 +158,7 @@ def RunImageConversion():
 
         else:
             for file in files:
-                ProcessImage(source, dest, file, dest_format, source_format, watermark)
+                ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y)
             run_label.config(text="Done! Ready for next job.")
 
     else:
@@ -136,7 +167,7 @@ def RunImageConversion():
 
 if __name__ == "__main__":
     config = {"source": '', "dest": '', 'multiprocessing': '1',
-              "source_format": '.CR2', "dest_format": '.PNG', "files": [], "watermark": u"\u00A9"}
+              "source_format": '.CR2', "dest_format": '.PNG', "files": [], "watermark": u"\u00A9", "resize_x": '', "resize_y": ''}
     
     metrix = {"num_in": 0}
 
@@ -144,16 +175,19 @@ if __name__ == "__main__":
                       ".ICO", ".IM", ".JPG", ".MSP", ".PCX", ".PNG", ".PPM", ".SGI", ".TIFF", ".TIF"]
 
     window = Tk()  # init window
-    window.geometry("600x400")  # set window size
+    window.geometry("600x450")  # set window size
     window.configure(bg='black')
     window.resizable(True, True)
 
     source_format_var = StringVar(window)
     source_format_var.set(".CR2")
+    
     dest_format_var = StringVar(window)
     dest_format_var.set(".PNG")
+    
     multiprocessing_var = StringVar(window)
     multiprocessing_var.set("1")
+    
     watermark_var = StringVar(window)
     watermark_var.set(u"\u00A9")
     
@@ -188,6 +222,9 @@ if __name__ == "__main__":
     watermark_frame = Frame(window)
     watermark_frame.config(bg='black', pady=padding)
     watermark_frame.pack()
+    resize_frame = Frame(window)
+    resize_frame.config(bg='black', pady=padding)
+    resize_frame.pack()
     run_frame = Frame(window)
     run_frame.config(bg='black', pady=padding)
     run_frame.pack()
@@ -224,6 +261,17 @@ if __name__ == "__main__":
     watermark_input = Entry(
         watermark_frame, width=30, textvariable=watermark_var)
     
+    resize_x_var = IntVar()
+    resize_y_var = IntVar()
+    resize_label = Label(
+        resize_frame, text="Resize image (0 will maintain AR):", bg='black', fg='white')
+    resize_x_input = Entry(
+        resize_frame, width=10, textvariable=resize_x_var)
+    resize_label_2 = Label(
+        resize_frame, text=" x ", bg='black', fg='white')
+    resize_y_input = Entry(
+        resize_frame, width=10, textvariable=resize_y_var)
+    
     run_label = Label(run_frame, text="Not Running.", bg='black', fg='white')
     run_button = Button(run_frame, text="Convert Files",
                         fg="black", command=RunImageConversion)
@@ -244,6 +292,11 @@ if __name__ == "__main__":
 
     watermark_label.grid(row=0, column=0)
     watermark_input.grid(row=0, column=1)
+    
+    resize_label.grid(row=0, column=0)
+    resize_x_input.grid(row=0, column=1)
+    resize_label_2.grid(row=0, column=2)
+    resize_y_input.grid(row=0, column=3)
     
     run_button.grid(row=0, column=0)
     run_label.grid(row=1, column=0)

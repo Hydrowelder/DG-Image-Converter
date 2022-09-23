@@ -6,4 +6,5 @@
 /dist
 /build
 /__pycache__
-Helvetica.ttf
+*.ttf
+*.bat
