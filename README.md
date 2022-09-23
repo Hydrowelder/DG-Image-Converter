@@ -10,4 +10,5 @@ To use,
   7. Select number of cores (cannot be 0 or greater than those available)
   8. Type in your desired watermark (leave empty for no watermark)
   9. Select the desired image size in pixels (leave as 0 by 0 for no resize, X by 0 to maintain aspect ratio and resize driven by width, 0 by X to maintain AR and resize driven by height, and X by Y to resize both width and height)
-  10. Click convert files to run the program
+  10. Type a file name prefix or suffix (prefix+original file name+suffix.desired file extension, leave blank for no change)
+  11. Click convert files to run the program
