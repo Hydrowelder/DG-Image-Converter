@@ -55,7 +55,7 @@ def GetDestFolder():
             dest_label.config(text=dest)
 
 
-def ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y):
+def ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y, prefix, suffix):
     im1 = PIL.Image.open(source+'/'+file)
     if source_format == '.PNG' and dest_format == '.JPG':
         im1 = im1.convert('RGB') 
@@ -99,7 +99,7 @@ def ProcessImage(source, dest, file, dest_format, source_format, watermark, resi
         draw.rectangle(((width-w)-2*w_margin*w, (height-h)-2*h_margin*h, width, height), fill=(0,0,0))
         draw.text(((width-w)-w_margin*w,(height-h)-h_margin*h),watermark,fill=(255,255,255),font=font)
     
-    im1.save(dest+'/'+os.path.splitext(file)[0]+dest_format)
+    im1.save(dest+'/'+prefix+os.path.splitext(file)[0]+suffix+dest_format)
 
 
 def SetSourceFormat():
@@ -117,6 +117,8 @@ def RunImageConversion():
     watermark = watermark_var.get()
     resize_x = resize_x_var.get()
     resize_y = resize_y_var.get()
+    prefix = prefix_var.get()
+    suffix = suffix_var.get()
     
     dest_format = dest_format_var.get()
     source_format = source_format_var.get()
@@ -135,11 +137,14 @@ def RunImageConversion():
                 watermark_tuple = [watermark]*len(files)
                 resize_x_tuple = [resize_x]*len(files)
                 resize_y_tuple = [resize_y]*len(files)
+                prefix_tuple = [prefix]*len(files)
+                suffix_tuple = [suffix]*len(files)
                 
                 iter_var = [*zip(source_tuple, dest_tuple,
                                  files_tuple, dest_format_tuple, 
                                  source_format_tuple, watermark_tuple,
-                                 resize_x_tuple, resize_y_tuple)]
+                                 resize_x_tuple, resize_y_tuple, 
+                                 prefix_tuple, suffix_tuple)]
 
                 pool = multiprocessing.Pool(int(multiprocessing_var.get()))
                 pool.starmap(ProcessImage, iterable=iter_var)
@@ -158,7 +163,7 @@ def RunImageConversion():
 
         else:
             for file in files:
-                ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y)
+                ProcessImage(source, dest, file, dest_format, source_format, watermark, resize_x, resize_y, prefix, suffix)
             run_label.config(text="Done! Ready for next job.")
 
     else:
@@ -167,7 +172,7 @@ def RunImageConversion():
 
 if __name__ == "__main__":
     config = {"source": '', "dest": '', 'multiprocessing': '1',
-              "source_format": '.CR2', "dest_format": '.PNG', "files": [], "watermark": u"\u00A9", "resize_x": '', "resize_y": ''}
+              "source_format": '.CR2', "dest_format": '.PNG', "files": [], "watermark": u"\u00A9", "resize_x": '', "resize_y": '', "prefix": '', "suffix": ''}
     
     metrix = {"num_in": 0}
 
@@ -175,7 +180,7 @@ if __name__ == "__main__":
                       ".ICO", ".IM", ".JPG", ".MSP", ".PCX", ".PNG", ".PPM", ".SGI", ".TIFF", ".TIF"]
 
     window = Tk()  # init window
-    window.geometry("600x450")  # set window size
+    window.geometry("600x500")  # set window size
     window.configure(bg='black')
     window.resizable(True, True)
 
@@ -190,6 +195,11 @@ if __name__ == "__main__":
     
     watermark_var = StringVar(window)
     watermark_var.set(u"\u00A9")
+    
+    prefix_var = StringVar(window)
+    prefix_var.set("")
+    suffix_var = StringVar(window)
+    suffix_var.set("")
     
     window.title("DG Image Converter")
     
@@ -225,6 +235,9 @@ if __name__ == "__main__":
     resize_frame = Frame(window)
     resize_frame.config(bg='black', pady=padding)
     resize_frame.pack()
+    naming_frame = Frame(window)
+    naming_frame.config(bg='black', pady=padding)
+    naming_frame.pack()
     run_frame = Frame(window)
     run_frame.config(bg='black', pady=padding)
     run_frame.pack()
@@ -272,6 +285,15 @@ if __name__ == "__main__":
     resize_y_input = Entry(
         resize_frame, width=10, textvariable=resize_y_var)
     
+    naming_label = Label(
+        naming_frame, text="Prefix:", bg='black', fg='white')
+    prefix_input = Entry(
+        naming_frame, width=10, textvariable=prefix_var)
+    naming_label_2 = Label(
+        naming_frame, text="Suffix:", bg='black', fg='white')
+    suffix_input = Entry(
+        naming_frame, width=10, textvariable=suffix_var)
+    
     run_label = Label(run_frame, text="Not Running.", bg='black', fg='white')
     run_button = Button(run_frame, text="Convert Files",
                         fg="black", command=RunImageConversion)
@@ -297,6 +319,11 @@ if __name__ == "__main__":
     resize_x_input.grid(row=0, column=1)
     resize_label_2.grid(row=0, column=2)
     resize_y_input.grid(row=0, column=3)
+    
+    naming_label.grid(row=0, column=0)
+    prefix_input.grid(row=0, column=1)
+    naming_label_2.grid(row=0, column=2)
+    suffix_input.grid(row=0, column=3)
     
     run_button.grid(row=0, column=0)
     run_label.grid(row=1, column=0)
