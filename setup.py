@@ -1,4 +1,9 @@
-from distutils.core import setup
-import py2exe
+from setuptools import setup, find_packages
 
-setup(console=['DG_Image_Converter.py'])
+setup(
+    name="imageconverter",
+    version="1.0",
+    packages=['imageconverter'],
+    package_dir={'':'src'},
+    install_requires=["numpy", "pathlib", "pillow"],
+)
